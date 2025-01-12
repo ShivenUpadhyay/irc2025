@@ -5,6 +5,7 @@
 
 geometry_msgs::Point rover;
 std_msgs::Int8 cameras;
+std_msgs::Int8 fans;
 
 class Teleop{
   private:
@@ -13,10 +14,13 @@ class Teleop{
     //ros::Publisher color_pub;
     ros::Publisher cam_pub;
     ros::Subscriber sub;
+    ros::Publisher fan_pub;
   public:
     Teleop(){
+      fans.data=0;
       this->vel_pub = this->nh.advertise<geometry_msgs::Point>("/rover", 20);
       this->cam_pub = this->nh.advertise<std_msgs::Int8>("/cameras", 20);
+      this->fan_pub = this->nh.advertise<std_msgs::Int8>("/fan_control", 20);
       //this->color_pub = this->nh.advertise<std_msgs::Int8>("/led", 20);
       this->sub = this->nh.subscribe("/joy0", 20, &Teleop::joyCallback, this);
     }
@@ -41,46 +45,70 @@ class Teleop{
         this->vel_pub.publish(rover);
       }
       
-      if(msg.axes[9]>0.9)
+      if(msg.axes[9]>0.9) //Gimbal 1 Up
       {
       	cameras.data=0;
       	this->cam_pub.publish(cameras);
       }
-      if(msg.axes[9]<-0.9)
+      if(msg.axes[9]<-0.9)  //Gimbal 1 Down
       {
       	cameras.data=1;
       	this->cam_pub.publish(cameras);
       }
-      if(msg.axes[8]>0.9)
+      if(msg.axes[8]>0.9)  //Gimbal 1 Left
       {
       	cameras.data=2;
       	this->cam_pub.publish(cameras);
       }
-      if(msg.axes[8]<-0.9)
+      if(msg.axes[8]<-0.9)  //Gimbal 1 Right
       {
       	cameras.data=3;
       	this->cam_pub.publish(cameras);
       }
-      if(msg.buttons[1])
+
+      if(msg.axes[7]>0.9) //Gimbal 2 Left
       {
       	cameras.data=4;
       	this->cam_pub.publish(cameras);
       }
-      if(msg.buttons[3])
+      if(msg.axes[7]<-0.9)  //Gimbal 2 Right
       {
       	cameras.data=5;
       	this->cam_pub.publish(cameras);
       }
-      if(msg.buttons[2])
+      if(msg.buttons[8])  //Gimbal 2 Up
       {
       	cameras.data=6;
       	this->cam_pub.publish(cameras);
       }
-      if(msg.buttons[0])
+      if(msg.buttons[9])  //Gimbal 2 Down
       {
       	cameras.data=7;
       	this->cam_pub.publish(cameras);
       }
+      
+      if(msg.axes[5]>0.9) //Gimbal 3 Left
+      {
+      	cameras.data=8;
+      	this->cam_pub.publish(cameras);
+      }
+      if(msg.axes[5]<-0.9)  //Gimbal 3 Right
+      {
+      	cameras.data=9;
+      	this->cam_pub.publish(cameras);
+      }
+
+      if(msg.buttons[0])
+      {
+        if(fans.data==0)
+        {
+          fans.data=1;
+        }
+        else
+          fans.data=0;
+        this->fan_pub.publish(fans);
+      }
+  
       
       // led.data = 0;
       // this->color_pub.publish(led);
